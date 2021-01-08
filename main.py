@@ -173,7 +173,7 @@ class Renderer(Widget):
         self.fbo.shader.source = 'select_mode.glsl'
         self.fbo.ask_update()
         self.fbo.draw()
-        print self.fbo.get_pixel_color(touch.x, touch.y)
+        print(self.fbo.get_pixel_color(touch.x, touch.y))
         self.fbo.shader.source = 'simple.glsl'
         self.fbo.ask_update()
         self.fbo.draw()

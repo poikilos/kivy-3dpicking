@@ -4,19 +4,19 @@ class MeshData(object):
     def __init__(self, **kwargs):
         self.name = kwargs.get("name")
         self.vertex_format = [
-            ('v_pos', 3, 'float'),
-            ('v_normal', 3, 'float'),
-            ('v_tc0', 2, 'float')]
+            (b'v_pos', 3, 'float'),
+            (b'v_normal', 3, 'float'),
+            (b'v_tc0', 2, 'float')]
         self.vertices = []
         self.indices = []
-        
+
         # Default basic material of mesh object
         self.diffuse_color = (1.0, 1.0, 1.0)
         self.ambient_color = (1.0, 1.0, 1.0)
         self.specular_color = (1.0, 1.0, 1.0)
         self.specular_coefficent = 16.0
         self.transparency = 1.0
-        
+
     def set_materials(self, mtl_dict):
         self.diffuse_color = mtl_dict.get('Kd') or self.diffuse_color
         self.diffuse_color = [float(v) for v in self.diffuse_color]
@@ -26,10 +26,10 @@ class MeshData(object):
         self.specular_color = [float(v) for v in self.specular_color]
         self.specular_coefficent = float(mtl_dict.get('Ns', self.specular_coefficent))
         transparency = mtl_dict.get('d')
-        if not transparency: 
+        if not transparency:
             transparency = 1.0 - float(mtl_dict.get('Tr', 0))
         self.transparency = float(transparency)
-        
+
 
     def calculate_normals(self):
         for i in range(len(self.indices) / (3)):
@@ -61,7 +61,7 @@ class MeshData(object):
 
 class ObjFileLoader(object):
     """  """
-    
+
     def finish_object(self):
         if self._current_object == None:
             return
@@ -92,7 +92,7 @@ class ObjFileLoader(object):
             tri = [idx, idx+1, idx+2]
             mesh.indices.extend(tri)
             idx += 3
-        
+
         material = self.mtl.get(self.obj_material)
         if material:
             mesh.set_materials(material)
@@ -107,12 +107,12 @@ class ObjFileLoader(object):
         self.normals = []
         self.texcoords = []
         self.faces = []
-        
+
 
         self._current_object = None
 
         self.obj_material = None
-        
+
         for line in open(filename, "r"):
             if delimiter == "# object" and "# object" in line:
                 if self._current_object:
@@ -133,17 +133,17 @@ class ObjFileLoader(object):
             elif values[0] in ('usemtl', 'usemat'):
                 self.obj_material = values[1]
             if values[0] == 'v':
-                v = map(float, values[1:4])
+                v = list(map(float, values[1:4]))
                 if swapyz:
                     v = v[0], v[2], v[1]
                 self.vertices.append(v)
             elif values[0] == 'vn':
-                v = map(float, values[1:4])
+                v = list(map(float, values[1:4]))
                 if swapyz:
                     v = v[0], v[2], v[1]
                 self.normals.append(v)
             elif values[0] == 'vt':
-                self.texcoords.append(map(float, values[1:3]))
+                self.texcoords.append(list(map(float, values[1:3])))
             elif values[0] == 'f':
                 face = []
                 texcoords = []
@@ -164,7 +164,7 @@ class ObjFileLoader(object):
 
 
 class MTL(object):
-    
+
     def __init__(self, filename):
         self.contents = {}
         if not os.path.exists(filename):
@@ -176,14 +176,14 @@ class MTL(object):
             if values[0] == 'newmtl':
                 mtl = self.contents[values[1]] = {}
             elif mtl is None:
-                raise ValueError, "mtl file doesn't start with newmtl stmt"
+                raise ValueError("mtl file doesn't start with newmtl stmt")
             if len(values[1:]) > 1:
                 mtl[values[0]] = values[1:]
             else:
                 mtl[values[0]] = values[1]
-    
+
     def __getitem__(self, key):
         return self.contents[key]
-    
+
     def get(self, key, default=None):
         return self.contents.get(key, default)
